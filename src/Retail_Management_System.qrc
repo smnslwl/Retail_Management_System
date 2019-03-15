@@ -1,0 +1,46 @@
+<RCC>
+    <qresource prefix="/">
+        <file>../icons/about.png</file>
+        <file>../icons/add.png</file>
+        <file>../icons/barcode.png</file>
+        <file>../icons/barcode_scanner.png</file>
+        <file>../icons/cancel.png</file>
+        <file>../icons/cash_register.png</file>
+        <file>../icons/category.png</file>
+        <file>../icons/clear.png</file>
+        <file>../icons/delivery.png</file>
+        <file>../icons/dollar.png</file>
+        <file>../icons/download.png</file>
+        <file>../icons/edit.png</file>
+        <file>../icons/english.png</file>
+        <file>../icons/exit.png</file>
+        <file>../icons/export.png</file>
+        <file>../icons/forgot_password.png</file>
+        <file>../icons/import.png</file>
+        <file>../icons/language.png</file>
+        <file>../icons/login.png</file>
+        <file>../icons/manual.png</file>
+        <file>../icons/nepali.png</file>
+        <file>../icons/ok.png</file>
+        <file>../icons/password.png</file>
+        <file>../icons/pos.png</file>
+        <file>../icons/print.png</file>
+        <file>../icons/product.png</file>
+        <file>../icons/receipt.png</file>
+        <file>../icons/remove.png</file>
+        <file>../icons/sales.png</file>
+        <file>../icons/search.png</file>
+        <file>../icons/store.png</file>
+        <file>../icons/support.png</file>
+        <file>../icons/trolley.png</file>
+        <file>../icons/user_add.png</file>
+        <file>../icons/user_edit.png</file>
+        <file>../icons/user_menu.png</file>
+        <file>../icons/user_ok.png</file>
+        <file>../icons/user_remove.png</file>
+        <file>../icons/users.png</file>
+        <file>../icons/warehouse.png</file>
+        <file>../icons/help.png</file>
+        <file>../icons/file.png</file>
+    </qresource>
+</RCC>
