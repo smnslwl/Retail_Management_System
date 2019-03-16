@@ -506,7 +506,8 @@ void MainWindow::writeSettings()
 void MainWindow::newSale()
 {
     NewSaleWindow *win = new NewSaleWindow(this);
-    win->showMaximized();
+    win->showFullScreen();
+    hide();
 }
 
 /**
