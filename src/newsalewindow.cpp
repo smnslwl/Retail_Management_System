@@ -3,7 +3,7 @@
 #include "product.h"
 #include "groupsale.h"
 #include "sale.h"
-#include "quantitydialog.h"
+#include "spinboxdialog.h"
 #include <cmath>
 #include <QtWidgets>
 
@@ -463,18 +463,19 @@ void NewSaleWindow::edit()
         int i = saleTable->item(row, 5)->text().toInt();
         Product product = Product::getById(saleList[i].product());
 
-        QuantityDialog dialog;
+        SpinBoxDialog dialog;
         dialog.setWindowTitle(tr("Edit quantity"));
-        dialog.quantitySpinBox->setMinimum(1);
-        dialog.quantitySpinBox->setMaximum(product.stock() - productQuantities[product.id()] + saleList[i].quantity());
-        dialog.quantitySpinBox->setValue(saleList[i].quantity());
+        dialog.spinBoxLabel->setText(tr("Edit quantity"));
+        dialog.spinBox->setMinimum(1);
+        dialog.spinBox->setMaximum(product.stock() - productQuantities[product.id()] + saleList[i].quantity());
+        dialog.spinBox->setValue(saleList[i].quantity());
 
         if (dialog.exec()) {
-            int addedQuantity = dialog.quantitySpinBox->value() - saleList[i].quantity();
+            int addedQuantity = dialog.spinBox->value() - saleList[i].quantity();
 
             productQuantities[product.id()] += addedQuantity;
-            saleList[i].setQuantity(dialog.quantitySpinBox->value());
-            saleList[i].setAmount(dialog.quantitySpinBox->value() * product.price());
+            saleList[i].setQuantity(dialog.spinBox->value());
+            saleList[i].setAmount(dialog.spinBox->value() * product.price());
 
             searchRefresh();
             saleRefresh();

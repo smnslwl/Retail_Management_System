@@ -19,7 +19,6 @@ SOURCES += \
     sale.cpp \
     saleeditdialog.cpp \
     newsalewindow.cpp \
-    quantitydialog.cpp \
     loginwindow.cpp \
     user.cpp \
     userdialog.cpp \
@@ -40,7 +39,6 @@ HEADERS += \
     sale.h \
     saleeditdialog.h \
     newsalewindow.h \
-    quantitydialog.h \
     loginwindow.h \
     user.h \
     userdialog.h \
