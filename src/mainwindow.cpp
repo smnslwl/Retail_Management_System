@@ -507,7 +507,6 @@ void MainWindow::newSale()
 {
     NewSaleWindow *win = new NewSaleWindow(this);
     win->showFullScreen();
-    hide();
 }
 
 /**

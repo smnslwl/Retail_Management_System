@@ -220,13 +220,11 @@ void NewSaleWindow::closeEvent(QCloseEvent *event)
         int reply = box.exec();
         if (reply == QMessageBox::Yes) {
             clearSale();
-            mainWindow->show();
             event->accept();
         } else {
             event->ignore();
         }
     } else {
-        mainWindow->show();
         event->accept();
     }
 }
