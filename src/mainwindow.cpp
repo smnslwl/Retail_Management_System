@@ -754,11 +754,11 @@ void MainWindow::displayReceipt(int groupSaleId)
     QList<Sale> sales = Sale::getAllByGroup(groupSale.id());
     QString cashierName = User::getById(Shift::getById(groupSale.shift()).cashier()).name();
     QString html;
-    html += "<html><head><style>body{margin:10px; padding:10px;} table, td, th {border: 1px; text-align: left;} table {border-collapse: collapse; width: 100%;} th, td {padding: 10px;}</style></head><body>";
+    html += "<html><head><style>body{margin:10px; padding:10px;} table, td, th {border: 1px; text-align: left;} table {border-collapse: collapse; width: 100%; margin: 10px 0;} th, td {padding: 0 10px;}</style></head><body>";
     html += QString("<h1>%1</h1>").arg(storeName);
-    html += QString("<p>Date: %1</p>").arg(groupSale.date());
-    html += QString("<p>Cashier: %1</p>").arg(cashierName);
-    html += QString("<p>Customer: %1</p>").arg(groupSale.name());
+    html += QString("<p>Date: %1<br/>").arg(groupSale.date());
+    html += QString("Cashier: %1<br/>").arg(cashierName);
+    html += QString("Customer: %1</p>").arg(groupSale.name());
     html += "<table>";
     html += "<tr>";
     html += "<th>SN</th>";
@@ -767,6 +767,7 @@ void MainWindow::displayReceipt(int groupSaleId)
     html += "<th>QTY</th>";
     html += "<th>AMOUNT</th>";
     html += "</tr>";
+    html += QString("<tr><td colspan='5'></td></tr>");
     for (int i = 0; i < sales.size(); i++) {
         html += "<tr>";
         html += QString("<td>%1</td>").arg(i + 1);
@@ -776,12 +777,14 @@ void MainWindow::displayReceipt(int groupSaleId)
         html += QString("<td>%1</td>").arg(sales[i].amount());
         html += "</tr>";
     }
-    html += QString("<tr><td></td><td><strong>SUBTOTAL</strong></td><td></td><td></td><td><strong>%1</strong></td></tr>").arg(groupSale.subtotal());
-    html += QString("<tr><td></td><td><strong>DISCOUNT</strong></td><td></td><td></td><td><strong>%1</strong></td></tr>").arg(groupSale.discount());
-    html += QString("<tr><td></td><td><strong>TAX</strong></td><td></td><td></td><td><strong>%1</strong></td></tr>").arg(groupSale.tax());
+    html += QString("<tr><td colspan='5'></td></tr>");
+    html += QString("<tr><td></td><td><strong>Subtotal</strong></td><td></td><td></td><td><strong>%1</strong></td></tr>").arg(groupSale.subtotal());
+    html += QString("<tr><td></td><td><strong>Discount</strong></td><td></td><td></td><td><strong>%1</strong></td></tr>").arg(groupSale.discount());
+    html += QString("<tr><td></td><td><strong>Tax</strong></td><td></td><td></td><td><strong>%1</strong></td></tr>").arg(groupSale.tax());
+    html += QString("<tr><td colspan='5'></td></tr>");
     html += QString("<tr><td></td><td><strong>TOTAL</strong></td><td></td><td></td><td><strong>%1</strong></td></tr>").arg(groupSale.total());
     html += "</table>";
-    html += QString("<h3>THANK YOU, HAVE A NICE DAY!</h3>");
+    html += QString("<p><strong>THANK YOU FOR SHOPPING WITH US</strong></p>");
     html += "</body></html>";
 
     WebViewDialog dialog;
