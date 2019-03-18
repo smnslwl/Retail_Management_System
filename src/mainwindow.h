@@ -42,6 +42,7 @@ public:
     void shiftSelectionRefresh();
     void shiftRefresh();
     void displayReceipt(int groupSaleId);
+    void displayReportProduct(int productId);
     int currentBalance;
     User currentUser;
     Shift currentShift;
@@ -69,6 +70,7 @@ private:
     void productEdit();
     void productRemove();
     void productPurchase();
+    void productReport();
     void categoryAdd();
     void categoryEdit();
     void categoryRemove();
@@ -103,6 +105,7 @@ private:
     QPushButton *productEditButton;
     QPushButton *productRemoveButton;
     QPushButton *productPurchaseButton;
+    QPushButton *productReportButton;
     QStringList productHeaderLabels;
     QList<Product> productList;
     QTableWidget *categoryTable;
