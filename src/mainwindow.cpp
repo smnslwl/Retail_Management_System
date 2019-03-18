@@ -49,7 +49,8 @@ MainWindow::MainWindow(const User &user, QWidget *parent)
 
     groupSaleSearchEdit = new QLineEdit;
     groupSaleSearchEdit->setPlaceholderText(tr("Search by Customer or Cashier"));
-    groupSaleReceiptButton = new QPushButton(QIcon(":/icons/receipt.png"), tr("Receipt"));
+    groupSaleRemoveButton = new QPushButton(QIcon(":/icons/remove.png"), tr("Remove"));
+    groupSaleReceiptButton = new QPushButton(QIcon(":/icons/receipt.png"), tr("Receipt..."));
 
     groupSaleTable = new QTableWidget;
     groupSaleTable->setEditTriggers(QAbstractItemView::NoEditTriggers);  // disable in-place editing
@@ -65,6 +66,7 @@ MainWindow::MainWindow(const User &user, QWidget *parent)
 
     QHBoxLayout *groupSaleButtonLayout = new QHBoxLayout;
     groupSaleButtonLayout->setAlignment(Qt::AlignLeft);
+    groupSaleButtonLayout->addWidget(groupSaleRemoveButton);
     groupSaleButtonLayout->addWidget(groupSaleReceiptButton);
 
     QGroupBox *groupSaleGroup = new QGroupBox;
@@ -74,6 +76,7 @@ MainWindow::MainWindow(const User &user, QWidget *parent)
     groupSaleLayout->addLayout(groupSaleButtonLayout);
     groupSaleGroup->setLayout(groupSaleLayout);
 
+    connect(groupSaleRemoveButton, &QPushButton::clicked, this, &MainWindow::groupSaleRemove);
     connect(groupSaleReceiptButton, &QPushButton::clicked, this, &MainWindow::groupSaleReceipt);
     connect(groupSaleTable->selectionModel(), &QItemSelectionModel::selectionChanged, this, &MainWindow::groupSaleSelectionRefresh);
     connect(groupSaleSearchEdit, &QLineEdit::textEdited, this, &MainWindow::groupSaleRefresh);
@@ -685,8 +688,17 @@ void MainWindow::about()
 void MainWindow::groupSaleSelectionRefresh()
 {
     if (groupSaleTable->selectionModel()->hasSelection()) {
+        int row = groupSaleTable->selectionModel()->selectedRows().first().row();
+        int id = groupSaleTable->item(row, 0)->text().toInt();
+        GroupSale groupSale = GroupSale::getById(id);
         groupSaleReceiptButton->setEnabled(true);
+        if (groupSale.shift() == currentShift.id()) {
+            groupSaleRemoveButton->setEnabled(true);
+        } else {
+            groupSaleRemoveButton->setEnabled(false);
+        }
     } else {
+        groupSaleRemoveButton->setEnabled(false);
         groupSaleReceiptButton->setEnabled(false);
     }
 }
@@ -806,6 +818,33 @@ void MainWindow::displayReceipt(int groupSaleId)
     dialog.setWindowTitle(tr("Receipt"));
     dialog.webView->setHtml(html);
     dialog.exec();
+}
+
+/**
+ * Removes the selected group sale.
+**/
+void MainWindow::groupSaleRemove()
+{
+    if (groupSaleTable->selectionModel()->hasSelection()) {
+        int row = groupSaleTable->selectionModel()->selectedRows().first().row();
+        int id = groupSaleTable->item(row, 0)->text().toInt();
+        GroupSale groupSale = GroupSale::getById(id);
+        QList<Sale> sales = Sale::getAllByGroup(groupSale.id());
+        for (int i = 0; i < sales.size(); i++) {
+            Product product = Product::getById(sales[i].product());
+            product.setStock(product.stock() + sales[i].quantity());
+            product.save();
+            sales[i].remove();
+        }
+        groupSale.remove();
+        productRefresh();
+        saleRefresh();
+        groupSaleRefresh();
+        statusBar()->showMessage(tr("Group sale removed."), STATUSBAR_MS);
+        groupSaleTable->clearSelection();
+    } else {
+        displayError(tr("Nothing selected."));
+    }
 }
 
 /**

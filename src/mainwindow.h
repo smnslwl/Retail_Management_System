@@ -64,6 +64,7 @@ private:
     void importDatabase();
     void exportDatabase();
     void about();
+    void groupSaleRemove();
     void groupSaleReceipt();
     void saleEdit();
     void saleRemove();
@@ -90,6 +91,7 @@ private:
     QAction *toggleStatusBarAction;
     QTableWidget *groupSaleTable;
     QLineEdit *groupSaleSearchEdit;
+    QPushButton *groupSaleRemoveButton;
     QPushButton *groupSaleReceiptButton;
     QStringList groupSaleHeaderLabels;
     QList<GroupSale> groupSaleList;
