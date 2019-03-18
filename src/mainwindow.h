@@ -44,6 +44,8 @@ public:
     void displayReceipt(int groupSaleId);
     void displayReportProduct(int productId);
     void displayReportCategory(int categoryId);
+    void displayReportUser(int userId);
+    void displayReportShift(int shiftId);
     int currentBalance;
     User currentUser;
     Shift currentShift;
@@ -78,6 +80,8 @@ private:
     void categoryReport();
     void userEdit();
     void userRemove();
+    void userReport();
+    void shiftReport();
     void storeNameEdit();
     void storeNameRefresh();
     void defaultDiscountEdit();
@@ -122,10 +126,12 @@ private:
     QLineEdit *userSearchEdit;
     QPushButton *userEditButton;
     QPushButton *userRemoveButton;
+    QPushButton *userReportButton;
     QStringList userHeaderLabels;
     QList<User> userList;
     QTableWidget *shiftTable;
     QLineEdit *shiftSearchEdit;
+    QPushButton *shiftReportButton;
     QStringList shiftHeaderLabels;
     QList<Shift> shiftList;
 };

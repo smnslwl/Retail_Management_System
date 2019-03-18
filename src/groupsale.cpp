@@ -289,8 +289,8 @@ QList<GroupSale> GroupSale::getAllByShift(int groupSaleShiftId)
         groupSale.setTax(q.value("tax").toInt());
         groupSale.setShift(q.value("shift").toInt());
         groupSale.setDate(q.value("date").toString());
-        groupSales.append(groupSale);
         groupSale.calculateTotals();
+        groupSales.append(groupSale);
     }
 
     return groupSales;

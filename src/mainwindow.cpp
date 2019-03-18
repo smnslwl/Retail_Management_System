@@ -253,6 +253,7 @@ MainWindow::MainWindow(const User &user, QWidget *parent)
     userSearchEdit->setPlaceholderText(tr("Search by Name or Username"));
     userEditButton = new QPushButton(QIcon(":/icons/edit.png"), tr("Edit..."));
     userRemoveButton = new QPushButton(QIcon(":/icons/remove.png"), tr("Remove"));
+    userReportButton = new QPushButton(QIcon(":/icons/manual.png"), tr("Report..."));
 
     userTable = new QTableWidget;
     userTable->setEditTriggers(QAbstractItemView::NoEditTriggers);  // disable in-place editing
@@ -271,6 +272,7 @@ MainWindow::MainWindow(const User &user, QWidget *parent)
     userButtonLayout->setAlignment(Qt::AlignLeft);
     userButtonLayout->addWidget(userEditButton);
     userButtonLayout->addWidget(userRemoveButton);
+    userButtonLayout->addWidget(userReportButton);
 
     QGroupBox *userGroup = new QGroupBox;
     QVBoxLayout *userLayout = new QVBoxLayout;
@@ -281,6 +283,7 @@ MainWindow::MainWindow(const User &user, QWidget *parent)
 
     connect(userEditButton, &QPushButton::clicked, this, &MainWindow::userEdit);
     connect(userRemoveButton, &QPushButton::clicked, this, &MainWindow::userRemove);
+    connect(userReportButton, &QPushButton::clicked, this, &MainWindow::userReport);
     connect(userTable->selectionModel(), &QItemSelectionModel::selectionChanged, this, &MainWindow::userSelectionRefresh);
     connect(userSearchEdit, &QLineEdit::textEdited, this, &MainWindow::userRefresh);
 
@@ -290,6 +293,7 @@ MainWindow::MainWindow(const User &user, QWidget *parent)
 
     shiftSearchEdit = new QLineEdit;
     shiftSearchEdit->setPlaceholderText(tr("Search by Name"));
+    shiftReportButton = new QPushButton(QIcon(":/icons/manual.png"), tr("Report..."));
 
     shiftTable = new QTableWidget;
     shiftTable->setEditTriggers(QAbstractItemView::NoEditTriggers);  // disable in-place editing
@@ -303,12 +307,18 @@ MainWindow::MainWindow(const User &user, QWidget *parent)
     shiftSelectionRefresh();
     shiftRefresh();
 
+    QHBoxLayout *shiftButtonLayout = new QHBoxLayout;
+    shiftButtonLayout->setAlignment(Qt::AlignLeft);
+    shiftButtonLayout->addWidget(shiftReportButton);
+
     QGroupBox *shiftGroup = new QGroupBox;
     QVBoxLayout *shiftLayout = new QVBoxLayout;
     shiftLayout->addWidget(shiftSearchEdit);
     shiftLayout->addWidget(shiftTable);
+    shiftLayout->addLayout(shiftButtonLayout);
     shiftGroup->setLayout(shiftLayout);
 
+    connect(shiftReportButton, &QPushButton::clicked, this, &MainWindow::shiftReport);
     connect(shiftTable->selectionModel(), &QItemSelectionModel::selectionChanged, this, &MainWindow::shiftSelectionRefresh);
     connect(shiftSearchEdit, &QLineEdit::textEdited, this, &MainWindow::shiftRefresh);
 
@@ -1745,6 +1755,63 @@ void MainWindow::userRemove()
 }
 
 /**
+ * Displays the report for this user.
+**/
+void MainWindow::displayReportUser(int userId)
+{
+    User user = User::getById(userId);
+
+    int subtotal_sum = 0;
+    int total_sum = 0;
+    int transactions = 0;
+    QList<Shift> shifts = Shift::getAllByCashier(user.id());
+    for (int i = 0; i < shifts.size(); i++) {
+        QList<GroupSale> groupSales = GroupSale::getAllByShift(shifts[i].id());
+        for (int j = 0; j < groupSales.size(); j++) {
+            subtotal_sum += groupSales[j].subtotal();
+            total_sum += groupSales[j].total();
+        }
+        transactions += groupSales.size();
+    }
+
+    QString html;
+    html += "<html><head><style>body{margin:10px; padding:10px;} table, td, th {border: 1px; text-align: left;} table {border-collapse: collapse; width: 100%; margin: 10px 0;} th, td {padding: 0 10px;}</style></head><body>";
+    html += QString("<h1>User Report for %1</h1>").arg(user.name());
+    if (user.isAdmin()) {
+        html += "<p>Admin User</p>";
+    }
+    html += "<h3>Sales</h3>";
+    if (transactions == 0) {
+        html += "<p>No sales found by this user.</p>";
+    } else {
+        html += QString("<p>Number of transactions: %1</p>").arg(transactions);
+        html += QString("<p>Net sales (before discount and tax): %1</p>").arg(subtotal_sum);
+        html += QString("<p>Gross sales (after discount and tax): %1</p>").arg(total_sum);
+    }
+    html += "</body></html>";
+
+    WebViewDialog dialog;
+    dialog.setWindowTitle(tr("User Report"));
+    dialog.webView->setHtml(html);
+    dialog.exec();
+}
+
+/**
+ * Displays a report for the currently selected user.
+**/
+void MainWindow::userReport()
+{
+    if (userTable->selectionModel()->hasSelection()) {
+        int row = userTable->selectionModel()->selectedRows().first().row();
+        int id = userTable->item(row, 0)->text().toInt();
+        User user = User::getById(id);
+        displayReportUser(user.id());
+    } else {
+        displayError(tr("Nothing selected."));
+    }
+}
+
+/**
  * Enables/disables buttons based on whether a shift is selected or not.
 **/
 void MainWindow::shiftSelectionRefresh()
@@ -1805,6 +1872,58 @@ void MainWindow::shiftRefresh()
         shiftTable->setItem(i, 3, endDateItem);
     }
     shiftTable->setSortingEnabled(true);
+}
+
+/**
+ * Displays the report for this shift.
+**/
+void MainWindow::displayReportShift(int shiftId)
+{
+    Shift shift = Shift::getById(shiftId);
+
+    QList<GroupSale> groupSales = GroupSale::getAllByShift(shift.id());
+    int subtotal_sum = 0;
+    int total_sum = 0;
+    for (int i = 0; i < groupSales.size(); i++) {
+        subtotal_sum += groupSales[i].subtotal();
+        total_sum += groupSales[i].total();
+    }
+
+    QString html;
+    html += "<html><head><style>body{margin:10px; padding:10px;} table, td, th {border: 1px; text-align: left;} table {border-collapse: collapse; width: 100%; margin: 10px 0;} th, td {padding: 0 10px;}</style></head><body>";
+    html += "<h1>Shift Report</h1>";
+    html += QString("<p>Cashier: %1</p>").arg(User::getById(shift.cashier()).name());
+    html += QString("<p>Start Date: %1</p>").arg(shift.startDate());
+    html += QString("<p>End Date: %1</p>").arg(shift.endDate());
+    html += "<h3>Sales</h3>";
+    if (groupSales.size() == 0) {
+        html += "<p>No sales found during this shift.</p>";
+    } else {
+        html += QString("<p>Number of transactions: %1</p>").arg(groupSales.size());
+        html += QString("<p>Net sales (before discount and tax): %1</p>").arg(subtotal_sum);
+        html += QString("<p>Gross sales (after discount and tax): %1</p>").arg(total_sum);
+    }
+    html += "</body></html>";
+
+    WebViewDialog dialog;
+    dialog.setWindowTitle(tr("Shift Report"));
+    dialog.webView->setHtml(html);
+    dialog.exec();
+}
+
+/**
+ * Displays a report for the currently selected shift.
+**/
+void MainWindow::shiftReport()
+{
+    if (shiftTable->selectionModel()->hasSelection()) {
+        int row = shiftTable->selectionModel()->selectedRows().first().row();
+        int id = shiftTable->item(row, 0)->text().toInt();
+        Shift shift = Shift::getById(id);
+        displayReportShift(shift.id());
+    } else {
+        displayError(tr("Nothing selected."));
+    }
 }
 
 /**
