@@ -210,6 +210,7 @@ MainWindow::MainWindow(const User &user, QWidget *parent)
     categoryAddButton = new QPushButton(QIcon(":/icons/add.png"), tr("Add..."));
     categoryEditButton = new QPushButton(QIcon(":/icons/edit.png"), tr("Edit..."));
     categoryRemoveButton = new QPushButton(QIcon(":/icons/remove.png"), tr("Remove"));
+    categoryReportButton = new QPushButton(QIcon(":/icons/manual.png"), tr("Report..."));
 
     categoryTable = new QTableWidget;
     categoryTable->setEditTriggers(QAbstractItemView::NoEditTriggers);  // disable in-place editing
@@ -228,6 +229,7 @@ MainWindow::MainWindow(const User &user, QWidget *parent)
     categoryButtonLayout->addWidget(categoryAddButton);
     categoryButtonLayout->addWidget(categoryEditButton);
     categoryButtonLayout->addWidget(categoryRemoveButton);
+    categoryButtonLayout->addWidget(categoryReportButton);
 
     QGroupBox *categoryGroup = new QGroupBox;
     QVBoxLayout *categoryLayout = new QVBoxLayout;
@@ -239,6 +241,7 @@ MainWindow::MainWindow(const User &user, QWidget *parent)
     connect(categoryAddButton, &QPushButton::clicked, this, &MainWindow::categoryAdd);
     connect(categoryEditButton, &QPushButton::clicked, this, &MainWindow::categoryEdit);
     connect(categoryRemoveButton, &QPushButton::clicked, this, &MainWindow::categoryRemove);
+    connect(categoryReportButton, &QPushButton::clicked, this, &MainWindow::categoryReport);
     connect(categoryTable->selectionModel(), &QItemSelectionModel::selectionChanged, this, &MainWindow::categorySelectionRefresh);
     connect(categorySearchEdit, &QLineEdit::textEdited, this, &MainWindow::categoryRefresh);
 
@@ -1534,6 +1537,93 @@ void MainWindow::categoryRemove()
         productRefresh();
         statusBar()->showMessage(tr("Category removed."), STATUSBAR_MS);
         categoryTable->clearSelection();
+    } else {
+        displayError(tr("Nothing selected."));
+    }
+}
+
+/**
+ * Displays the report for this category.
+**/
+void MainWindow::displayReportCategory(int categoryId)
+{
+    Category category = Category::getById(categoryId);
+
+    QList<Purchase> all_purchases = Purchase::getAll();
+    QList<Purchase> purchases;
+    int purchase_amount_sum = 0;
+    int purchase_quantity_sum = 0;
+    for (int i = 0; i < all_purchases.size(); i++) {
+        Product product = Product::getById(all_purchases[i].product());
+        if (product.category() == category.id()) {
+            purchases.append(all_purchases[i]);
+            purchase_amount_sum += all_purchases[i].amount();
+            purchase_quantity_sum += all_purchases[i].quantity();
+        }
+    }
+
+    QList<Sale> all_sales = Sale::getAll();
+    QList<Sale> sales;
+    int sale_amount_sum = 0;
+    int sale_quantity_sum = 0;
+    for (int i = 0; i < all_sales.size(); i++) {
+        Product product = Product::getById(all_sales[i].product());
+        if (product.category() == category.id()) {
+            sales.append(all_sales[i]);
+            sale_amount_sum += all_sales[i].amount();
+            sale_quantity_sum += all_sales[i].quantity();
+        }
+    }
+
+    QList<Product> all_products = Product::getAll();
+    int future_sales_amount = 0;
+    for (int i = 0; i < all_products.size(); i++) {
+        if (all_products[i].category() == category.id()) {
+            future_sales_amount += all_products[i].stock() * all_products[i].price();
+        }
+    }
+
+    int projected_sales_amount = sale_amount_sum + future_sales_amount;
+    int profit_amount = projected_sales_amount - purchase_amount_sum;
+    double profit_percent = ((double) profit_amount / purchase_amount_sum) * 100;
+
+    QString html;
+    html += "<html><head><style>body{margin:10px; padding:10px;} table, td, th {border: 1px; text-align: left;} table {border-collapse: collapse; width: 100%; margin: 10px 0;} th, td {padding: 0 10px;}</style></head><body>";
+    html += QString("<h1>Category Report for %1</h1>").arg(category.name());
+    html += "<h3>Purchases</h3>";
+    html += QString("<p>Total purchase quantity: %1</p>").arg(purchase_quantity_sum);
+    html += QString("<p>Total purchase amount: %1</p>").arg(purchase_amount_sum);
+    html += "<h3>Sales</h3>";
+    html += QString("<p>Total sales quantity: %1</p>").arg(sale_quantity_sum);
+    html += QString("<p>Total sales amount: %1</p>").arg(sale_amount_sum);
+    html += "<h3>Future Sales</h3>";
+    html += QString("<p>Expected sales amount from stock: %1</p>").arg(future_sales_amount);
+    html += "<h3>Profit/Loss</h3>";
+    if (profit_amount > 0) {
+        html += QString("<p>Profit amount: %1</p>").arg(profit_amount);
+        html += QString("<p>Profit percent: %1</p>").arg(profit_percent);
+    } else {
+        html += QString("<p>Loss amount: %1</p>").arg(profit_amount);
+        html += QString("<p>Loss percent: %1</p>").arg(profit_percent);
+    }
+    html += "</body></html>";
+
+    WebViewDialog dialog;
+    dialog.setWindowTitle(tr("Category Report"));
+    dialog.webView->setHtml(html);
+    dialog.exec();
+}
+
+/**
+ * Displays a report for the currently selected category.
+**/
+void MainWindow::categoryReport()
+{
+    if (categoryTable->selectionModel()->hasSelection()) {
+        int row = categoryTable->selectionModel()->selectedRows().first().row();
+        int id = categoryTable->item(row, 0)->text().toInt();
+        Category category = Category::getById(id);
+        displayReportCategory(category.id());
     } else {
         displayError(tr("Nothing selected."));
     }

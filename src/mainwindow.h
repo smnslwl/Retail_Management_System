@@ -43,6 +43,7 @@ public:
     void shiftRefresh();
     void displayReceipt(int groupSaleId);
     void displayReportProduct(int productId);
+    void displayReportCategory(int categoryId);
     int currentBalance;
     User currentUser;
     Shift currentShift;
@@ -74,6 +75,7 @@ private:
     void categoryAdd();
     void categoryEdit();
     void categoryRemove();
+    void categoryReport();
     void userEdit();
     void userRemove();
     void storeNameEdit();
@@ -113,6 +115,7 @@ private:
     QPushButton *categoryAddButton;
     QPushButton *categoryEditButton;
     QPushButton *categoryRemoveButton;
+    QPushButton *categoryReportButton;
     QStringList categoryHeaderLabels;
     QList<Category> categoryList;
     QTableWidget *userTable;
