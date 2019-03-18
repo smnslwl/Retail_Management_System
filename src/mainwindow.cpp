@@ -1194,10 +1194,12 @@ void MainWindow::productSelectionRefresh()
         productEditButton->setEnabled(true);
         productRemoveButton->setEnabled(true);
         productPurchaseButton->setEnabled(true);
+        productReportButton->setEnabled(true);
     } else {
         productEditButton->setEnabled(false);
         productRemoveButton->setEnabled(false);
         productPurchaseButton->setEnabled(false);
+        productReportButton->setEnabled(false);
     }
 }
 
@@ -1480,9 +1482,11 @@ void MainWindow::categorySelectionRefresh()
     if (categoryTable->selectionModel()->hasSelection()) {
         categoryEditButton->setEnabled(true);
         categoryRemoveButton->setEnabled(true);
+        categoryReportButton->setEnabled(true);
     } else {
         categoryEditButton->setEnabled(false);
         categoryRemoveButton->setEnabled(false);
+        categoryReportButton->setEnabled(false);
     }
 }
 
@@ -1694,9 +1698,11 @@ void MainWindow::userSelectionRefresh()
         if (currentUser.id() != user.id()) {
             userRemoveButton->setEnabled(true);
         }
+        userReportButton->setEnabled(true);
     } else {
         userEditButton->setEnabled(false);
         userRemoveButton->setEnabled(false);
+        userReportButton->setEnabled(false);
     }
 }
 
@@ -1859,9 +1865,9 @@ void MainWindow::userReport()
 void MainWindow::shiftSelectionRefresh()
 {
     if (shiftTable->selectionModel()->hasSelection()) {
-        // Enable some buttons
+        shiftReportButton->setEnabled(true);
     } else {
-        // Disable some buttons
+        shiftReportButton->setEnabled(false);
     }
 }
 
