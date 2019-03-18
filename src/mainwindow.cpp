@@ -1015,7 +1015,14 @@ void MainWindow::saleRemove()
         Product product = Product::getById(sale.product());
         product.setStock(product.stock() + sale.quantity());
         product.save();
+
+        GroupSale groupSale = GroupSale::getById(sale.group());
         sale.remove();
+        QList<Sale> sales = Sale::getAllByGroup(groupSale.id());
+        if (sales.size() == 0) {
+            groupSale.remove();
+        }
+
         productRefresh();
         saleRefresh();
         groupSaleRefresh();
