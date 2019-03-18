@@ -972,13 +972,9 @@ void MainWindow::saleRemove()
         int row = saleTable->selectionModel()->selectedRows().first().row();
         int id = saleTable->item(row, 0)->text().toInt();
         Sale sale = Sale::getById(id);
+
         Product product = Product::getById(sale.product());
-
-        if (sale.quantity() > product.stock()) {
-            displayError(tr("Not enough stock of product."));
-        }
-
-        product.setStock(product.stock() - sale.quantity());
+        product.setStock(product.stock() + sale.quantity());
         product.save();
         sale.remove();
         productRefresh();
