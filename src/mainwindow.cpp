@@ -453,23 +453,29 @@ void MainWindow::createMenuAndActions()
     QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
     fileMenu->addAction(newSaleAction);
     fileMenu->addSeparator();
-    fileMenu->addAction(importDatabaseAction);
+    if (currentUser.isAdmin()) {
+        fileMenu->addAction(importDatabaseAction);
+    }
     fileMenu->addAction(exportDatabaseAction);
     fileMenu->addSeparator();
     fileMenu->addAction(exitAction);
     viewMenu->addAction(toggleMainToolbarAction);
     viewMenu->addAction(toggleStatusBarAction);
-    manageMenu->addAction(editStoreNameAction);
-    manageMenu->addAction(editDefaultDiscountAction);
-    manageMenu->addAction(editDefaultTaxAction);
-    manageMenu->addSeparator();
+    if (currentUser.isAdmin()) {
+        manageMenu->addAction(editStoreNameAction);
+        manageMenu->addAction(editDefaultDiscountAction);
+        manageMenu->addAction(editDefaultTaxAction);
+        manageMenu->addSeparator();
+    }
     manageMenu->addAction(changePasswordAction);
     helpMenu->addAction(aboutAction);
 
     QToolBar *mainToolBar = addToolBar(tr("Main Toolbar"));
     mainToolBar->addAction(newSaleAction);
     mainToolBar->addSeparator();
-    mainToolBar->addAction(importDatabaseAction);
+    if (currentUser.isAdmin()) {
+        mainToolBar->addAction(importDatabaseAction);
+    }
     mainToolBar->addAction(exportDatabaseAction);
     mainToolBar->addSeparator();
     mainToolBar->addAction(aboutAction);
