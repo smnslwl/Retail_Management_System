@@ -87,6 +87,7 @@ private:
     void storeNameRefresh();
     void defaultDiscountEdit();
     void defaultTaxEdit();
+    void changePassword();
     QAction *toggleMainToolbarAction;
     QAction *toggleStatusBarAction;
     QTableWidget *groupSaleTable;

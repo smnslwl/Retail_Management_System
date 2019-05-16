@@ -14,6 +14,7 @@
 #include "saleeditdialog.h"
 #include "userdialog.h"
 #include "webviewdialog.h"
+#include "changepassworddialog.h"
 #include <QtWidgets>
 #include <QtSql>
 
@@ -443,6 +444,7 @@ void MainWindow::createMenuAndActions()
     QAction *editStoreNameAction = new QAction(tr("Edit store &name..."), this);
     QAction *editDefaultDiscountAction = new QAction(tr("Edit default &discount..."), this);
     QAction *editDefaultTaxAction = new QAction(tr("Edit default &tax..."), this);
+    QAction *changePasswordAction = new QAction(tr("Change &password..."), this);
     QAction *aboutAction = new QAction(QIcon(":/icons/about.png"), tr("&About..."), this);
 
     QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
@@ -460,6 +462,8 @@ void MainWindow::createMenuAndActions()
     manageMenu->addAction(editStoreNameAction);
     manageMenu->addAction(editDefaultDiscountAction);
     manageMenu->addAction(editDefaultTaxAction);
+    manageMenu->addSeparator();
+    manageMenu->addAction(changePasswordAction);
     helpMenu->addAction(aboutAction);
 
     QToolBar *mainToolBar = addToolBar(tr("Main Toolbar"));
@@ -485,6 +489,7 @@ void MainWindow::createMenuAndActions()
     connect(editStoreNameAction, &QAction::triggered, this, &MainWindow::storeNameEdit);
     connect(editDefaultDiscountAction, &QAction::triggered, this, &MainWindow::defaultDiscountEdit);
     connect(editDefaultTaxAction, &QAction::triggered, this, &MainWindow::defaultTaxEdit);
+    connect(changePasswordAction, &QAction::triggered, this, &MainWindow::changePassword);
     connect(aboutAction, &QAction::triggered, this, &MainWindow::about);
 }
 
@@ -2036,5 +2041,38 @@ void MainWindow::defaultTaxEdit()
     if (dialog.exec()) {
         defaultTax = dialog.spinBox->value();
         statusBar()->showMessage(tr("Tax rate edited."), STATUSBAR_MS);
+    }
+}
+
+/**
+ * Displays a dialog box where the user can change their password.
+**/
+void MainWindow::changePassword()
+{
+    ChangePasswordDialog dialog;
+    dialog.setWindowTitle(tr("Change Password for %1").arg(currentUser.username()));
+    if (dialog.exec()) {
+
+        bool success = false;
+        QString oldPassword = QString(QCryptographicHash::hash(dialog.oldPassword->text().toLatin1(), QCryptographicHash::Md5).toHex());
+        QString newPassword1 = QString(QCryptographicHash::hash(dialog.newPassword1->text().toLatin1(), QCryptographicHash::Md5).toHex());
+        QString newPassword2 = QString(QCryptographicHash::hash(dialog.newPassword2->text().toLatin1(), QCryptographicHash::Md5).toHex());
+
+        if (dialog.oldPassword->text().trimmed().isEmpty() || dialog.newPassword1->text().trimmed().isEmpty() || dialog.newPassword2->text().trimmed().isEmpty()) {
+            displayError(tr("All fields are required and cannot be empty."));
+        } else if (currentUser.password().compare(oldPassword) != 0) {
+            displayError(tr("The current password you entered is incorrect."));
+        } else if (newPassword1.compare(newPassword2) != 0) {
+            displayError(tr("The two new passwords do not match."));
+        } else {
+            success = true;
+        }
+
+        if (success) {
+            currentUser.setPassword(newPassword1);
+            currentUser.save();
+            displayInfo(tr("Your password was successfully changed."));
+            statusBar()->showMessage(tr("Password changed."), STATUSBAR_MS);
+        }
     }
 }
