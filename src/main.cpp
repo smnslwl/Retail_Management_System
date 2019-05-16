@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
         // Initialize the application
         QApplication application(argc, argv);
         QApplication::setApplicationName(QCoreApplication::tr("Retail Management System"));
-        QApplication::setApplicationVersion("0.0.2");
+        QApplication::setApplicationVersion("0.0.3");
 
         // Display the login window
         LoginWindow loginWindow;
