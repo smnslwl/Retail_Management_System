@@ -333,11 +333,13 @@ MainWindow::MainWindow(const User &user, QWidget *parent)
     tabWidget->setIconSize(QSize(24, 24));
     tabWidget->addTab(groupSaleGroup, QIcon(":/icons/cash_register.png"), tr("Group Sales"));
     tabWidget->addTab(saleGroup, QIcon(":/icons/trolley.png"), tr("Sales"));
-    tabWidget->addTab(purchaseGroup, QIcon(":/icons/dollar.png"), tr("Purchases"));
-    tabWidget->addTab(productGroup, QIcon(":/icons/product.png"), tr("Products"));
-    tabWidget->addTab(categoryGroup, QIcon(":/icons/category.png"), tr("Categories"));
-    tabWidget->addTab(userGroup, QIcon(":/icons/users.png"), tr("Users"));
-    tabWidget->addTab(shiftGroup, QIcon(":/icons/user_menu.png"), tr("Shifts"));
+    if (currentUser.isAdmin()) {
+        tabWidget->addTab(purchaseGroup, QIcon(":/icons/dollar.png"), tr("Purchases"));
+        tabWidget->addTab(productGroup, QIcon(":/icons/product.png"), tr("Products"));
+        tabWidget->addTab(categoryGroup, QIcon(":/icons/category.png"), tr("Categories"));
+        tabWidget->addTab(userGroup, QIcon(":/icons/users.png"), tr("Users"));
+        tabWidget->addTab(shiftGroup, QIcon(":/icons/user_menu.png"), tr("Shifts"));
+    }
     setCentralWidget(tabWidget);
 
     QDate date = QDate::currentDate();
