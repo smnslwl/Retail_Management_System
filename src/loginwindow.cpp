@@ -150,7 +150,8 @@ void LoginWindow::connectToDatabase()
 
     // Open an existing SQLite database or create a new one.
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName(QString("%1/Retail_Management_System.db").arg(qApp->applicationDirPath()));
+    QString path = QStandardPaths::writableLocation(QStandardPaths::HomeLocation) + "/Retail_Management_System.db";
+    db.setDatabaseName(path);
 
     QString errorMessage = tr("Could not connect to the database.\n\n");
 
