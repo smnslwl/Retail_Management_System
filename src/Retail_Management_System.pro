@@ -27,7 +27,8 @@ SOURCES += \
     shift.cpp \
     webviewdialog.cpp \
     spinboxdialog.cpp \
-    changepassworddialog.cpp
+    changepassworddialog.cpp \
+    confirmdialog.cpp
 
 HEADERS += \
     mainwindow.h \
@@ -48,7 +49,8 @@ HEADERS += \
     shift.h \
     webviewdialog.h \
     spinboxdialog.h \
-    changepassworddialog.h
+    changepassworddialog.h \
+    confirmdialog.h
 
 RESOURCES += \
     Retail_Management_System.qrc

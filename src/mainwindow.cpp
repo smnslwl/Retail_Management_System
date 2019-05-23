@@ -15,6 +15,7 @@
 #include "userdialog.h"
 #include "webviewdialog.h"
 #include "changepassworddialog.h"
+#include "confirmdialog.h"
 #include <QtWidgets>
 #include <QtSql>
 
@@ -842,19 +843,25 @@ void MainWindow::groupSaleRemove()
         int row = groupSaleTable->selectionModel()->selectedRows().first().row();
         int id = groupSaleTable->item(row, 0)->text().toInt();
         GroupSale groupSale = GroupSale::getById(id);
-        QList<Sale> sales = Sale::getAllByGroup(groupSale.id());
-        for (int i = 0; i < sales.size(); i++) {
-            Product product = Product::getById(sales[i].product());
-            product.setStock(product.stock() + sales[i].quantity());
-            product.save();
-            sales[i].remove();
+
+        ConfirmDialog dialog;
+        dialog.setWindowTitle(tr("Remove Group Sale..."));
+        dialog.message->setText(tr("Are you sure you want to remove the selected group sale?"));
+        if (dialog.exec()) {
+            QList<Sale> sales = Sale::getAllByGroup(groupSale.id());
+            for (int i = 0; i < sales.size(); i++) {
+                Product product = Product::getById(sales[i].product());
+                product.setStock(product.stock() + sales[i].quantity());
+                product.save();
+                sales[i].remove();
+            }
+            groupSale.remove();
+            productRefresh();
+            saleRefresh();
+            groupSaleRefresh();
+            statusBar()->showMessage(tr("Group sale removed."), STATUSBAR_MS);
+            groupSaleTable->clearSelection();
         }
-        groupSale.remove();
-        productRefresh();
-        saleRefresh();
-        groupSaleRefresh();
-        statusBar()->showMessage(tr("Group sale removed."), STATUSBAR_MS);
-        groupSaleTable->clearSelection();
     } else {
         displayError(tr("Nothing selected."));
     }
@@ -1025,22 +1032,27 @@ void MainWindow::saleRemove()
         int id = saleTable->item(row, 0)->text().toInt();
         Sale sale = Sale::getById(id);
 
-        Product product = Product::getById(sale.product());
-        product.setStock(product.stock() + sale.quantity());
-        product.save();
+        ConfirmDialog dialog;
+        dialog.setWindowTitle(tr("Remove Sale..."));
+        dialog.message->setText(tr("Are you sure you want to remove the selected sale?"));
+        if (dialog.exec()) {
+            Product product = Product::getById(sale.product());
+            product.setStock(product.stock() + sale.quantity());
+            product.save();
 
-        GroupSale groupSale = GroupSale::getById(sale.group());
-        sale.remove();
-        QList<Sale> sales = Sale::getAllByGroup(groupSale.id());
-        if (sales.size() == 0) {
-            groupSale.remove();
+            GroupSale groupSale = GroupSale::getById(sale.group());
+            sale.remove();
+            QList<Sale> sales = Sale::getAllByGroup(groupSale.id());
+            if (sales.size() == 0) {
+                groupSale.remove();
+            }
+
+            productRefresh();
+            saleRefresh();
+            groupSaleRefresh();
+            statusBar()->showMessage(tr("Sale removed."), STATUSBAR_MS);
+            saleTable->clearSelection();
         }
-
-        productRefresh();
-        saleRefresh();
-        groupSaleRefresh();
-        statusBar()->showMessage(tr("Sale removed."), STATUSBAR_MS);
-        saleTable->clearSelection();
     } else {
         displayError(tr("Nothing selected."));
     }
@@ -1182,17 +1194,23 @@ void MainWindow::purchaseRemove()
         Purchase purchase = Purchase::getById(id);
         Product product = Product::getById(purchase.product());
 
-        if (purchase.quantity() > product.stock()) {
-            displayError(tr("Not enough stock of product."));
-        }
+        ConfirmDialog dialog;
+        dialog.setWindowTitle(tr("Remove Purchase..."));
+        dialog.message->setText(tr("Are you sure you want to remove the selected purchase?"));
+        if (dialog.exec()) {
+            if (purchase.quantity() > product.stock()) {
+                displayError(tr("Not enough stock of product."));
+            }
 
-        product.setStock(product.stock() - purchase.quantity());
-        product.save();
-        purchase.remove();
-        productRefresh();
-        purchaseRefresh();
-        statusBar()->showMessage(tr("Purchase removed."), STATUSBAR_MS);
-        purchaseTable->clearSelection();
+            product.setStock(product.stock() - purchase.quantity());
+            product.save();
+            purchase.remove();
+            productRefresh();
+            purchaseRefresh();
+            statusBar()->showMessage(tr("Purchase removed."), STATUSBAR_MS);
+            purchaseTable->clearSelection();
+
+        }
     } else {
         displayError(tr("Nothing selected."));
     }
@@ -1350,10 +1368,16 @@ void MainWindow::productRemove()
         int row = productTable->selectionModel()->selectedRows().first().row();
         int id = productTable->item(row, 0)->text().toInt();
         Product product = Product::getById(id);
-        product.remove();
-        productRefresh();
-        statusBar()->showMessage(tr("Product removed."), STATUSBAR_MS);
-        productTable->clearSelection();
+
+        ConfirmDialog dialog;
+        dialog.setWindowTitle(tr("Remove Product..."));
+        dialog.message->setText(tr("Are you sure you want to remove the selected product?"));
+        if (dialog.exec()) {
+            product.remove();
+            productRefresh();
+            statusBar()->showMessage(tr("Product removed."), STATUSBAR_MS);
+            productTable->clearSelection();
+        }
     } else {
         displayError(tr("Nothing selected."));
     }
@@ -1601,11 +1625,17 @@ void MainWindow::categoryRemove()
         int row = categoryTable->selectionModel()->selectedRows().first().row();
         int id = categoryTable->item(row, 0)->text().toInt();
         Category category = Category::getById(id);
-        category.remove();
-        categoryRefresh();
-        productRefresh();
-        statusBar()->showMessage(tr("Category removed."), STATUSBAR_MS);
-        categoryTable->clearSelection();
+
+        ConfirmDialog dialog;
+        dialog.setWindowTitle(tr("Remove Category..."));
+        dialog.message->setText(tr("Are you sure you want to remove the selected category?"));
+        if (dialog.exec()) {
+            category.remove();
+            categoryRefresh();
+            productRefresh();
+            statusBar()->showMessage(tr("Category removed."), STATUSBAR_MS);
+            categoryTable->clearSelection();
+        }
     } else {
         displayError(tr("Nothing selected."));
     }
@@ -1805,11 +1835,17 @@ void MainWindow::userRemove()
         int row = userTable->selectionModel()->selectedRows().first().row();
         int id = userTable->item(row, 0)->text().toInt();
         User user = User::getById(id);
-        user.remove();
-        userRefresh();
-        productRefresh();
-        statusBar()->showMessage(tr("User removed."), STATUSBAR_MS);
-        userTable->clearSelection();
+
+        ConfirmDialog dialog;
+        dialog.setWindowTitle(tr("Remove User..."));
+        dialog.message->setText(tr("Are you sure you want to remove the selected user?"));
+        if (dialog.exec()) {
+            user.remove();
+            userRefresh();
+            productRefresh();
+            statusBar()->showMessage(tr("User removed."), STATUSBAR_MS);
+            userTable->clearSelection();
+        }
     } else {
         displayError(tr("Nothing selected."));
     }
