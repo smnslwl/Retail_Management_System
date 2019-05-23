@@ -2049,7 +2049,7 @@ void MainWindow::storeNameEdit()
 **/
 void MainWindow::storeNameRefresh()
 {
-    setWindowTitle(storeName + " - " + qApp->applicationName());
+    setWindowTitle(storeName + " - " + qApp->applicationDisplayName());
 }
 
 /**
